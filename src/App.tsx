@@ -92,6 +92,12 @@ export default function App() {
   const [watchlist, setWatchlist] = useState<string[]>(['RELIANCE', 'TCS', 'HDFCBANK', 'TATAMOTORS']);
   const [selectedStock, setSelectedStock] = useState<StockQuote>(INITIAL_STOCKS[0]);
 
+  // Live Proxy Feed State
+  const [isLiveFeedActive, setIsLiveFeedActive] = useState<boolean>(true);
+  const [isLiveLoading, setIsLiveLoading] = useState<boolean>(false);
+  const [lastLiveSyncTime, setLastLiveSyncTime] = useState<string>('');
+  const [marketStatus, setMarketStatus] = useState<'OPEN' | 'CLOSED'>('OPEN');
+
   // Order Placement Modal State
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
   const [orderModalStock, setOrderModalStock] = useState<StockQuote>(INITIAL_STOCKS[0]);
@@ -99,31 +105,76 @@ export default function App() {
   const [orderModalSL, setOrderModalSL] = useState<number | undefined>();
   const [orderModalTarget, setOrderModalTarget] = useState<number | undefined>();
 
-  // Background price ticker simulation for realistic feel
+  // Fetch real market quotes from our backend Yahoo Finance proxy
+  const fetchLiveFeed = async () => {
+    setIsLiveLoading(true);
+    try {
+      const res = await fetch('/api/market/live-feed');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (data.indices && data.indices.length > 0) {
+        setIndices(data.indices);
+      }
+      if (data.stocks && data.stocks.length > 0) {
+        setStocks(data.stocks);
+        // Sync selectedStock with latest price and candles
+        setSelectedStock(prev => {
+          const updated = data.stocks.find((s: StockQuote) => s.symbol === prev.symbol);
+          return updated || prev;
+        });
+      }
+      if (data.marketStatus) {
+        setMarketStatus(data.marketStatus);
+      }
+      const now = new Date();
+      setLastLiveSyncTime(
+        now.toLocaleTimeString('en-IN', {
+          timeZone: 'Asia/Kolkata',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        })
+      );
+    } catch (err) {
+      console.warn('Live NSE feed unavailable, continuing with cached/algorithmic stream:', err);
+    } finally {
+      setIsLiveLoading(false);
+    }
+  };
+
+  // Live Feed or Simulation Polling Effect
   useEffect(() => {
-    const interval = setInterval(() => {
-      setStocks(prev => prev.map(s => {
-        // Small random tick variation (-0.08% to +0.08%)
-        const deltaPct = (Math.random() - 0.49) * 0.0016;
-        const newPrice = +(s.price * (1 + deltaPct)).toFixed(2);
-        const newHigh = Math.max(s.high, newPrice);
-        const newLow = Math.min(s.low, newPrice);
-        const newChange = +(newPrice - s.prevClose).toFixed(2);
-        const newChangePercent = +((newChange / s.prevClose) * 100).toFixed(2);
+    if (isLiveFeedActive) {
+      // Fetch immediately upon activation
+      fetchLiveFeed();
+      // Poll every 10 seconds (aligned with server cache TTL)
+      const interval = setInterval(fetchLiveFeed, 10000);
+      return () => clearInterval(interval);
+    } else {
+      // Offline / Sandbox random tick simulation for realistic testing
+      const interval = setInterval(() => {
+        setStocks(prev => prev.map(s => {
+          const deltaPct = (Math.random() - 0.49) * 0.0016;
+          const newPrice = +(s.price * (1 + deltaPct)).toFixed(2);
+          const newHigh = Math.max(s.high, newPrice);
+          const newLow = Math.min(s.low, newPrice);
+          const newChange = +(newPrice - s.prevClose).toFixed(2);
+          const newChangePercent = +((newChange / s.prevClose) * 100).toFixed(2);
 
-        return {
-          ...s,
-          price: newPrice,
-          high: newHigh,
-          low: newLow,
-          change: newChange,
-          changePercent: newChangePercent
-        };
-      }));
-    }, 3000);
+          return {
+            ...s,
+            price: newPrice,
+            high: newHigh,
+            low: newLow,
+            change: newChange,
+            changePercent: newChangePercent
+          };
+        }));
+      }, 3000);
 
-    return () => clearInterval(interval);
-  }, []);
+      return () => clearInterval(interval);
+    }
+  }, [isLiveFeedActive]);
 
   const handleToggleWatchlist = (symbol: string) => {
     setWatchlist(prev => 
@@ -316,6 +367,13 @@ export default function App() {
         setDataFreshness={setDataFreshness}
         virtualBalance={virtualBalance}
         onOpenOrderModal={() => setIsOrderModalOpen(true)}
+        isLiveFeedActive={isLiveFeedActive}
+        setIsLiveFeedActive={setIsLiveFeedActive}
+        isLiveLoading={isLiveLoading}
+        lastLiveSyncTime={lastLiveSyncTime}
+        onRefreshLiveFeed={fetchLiveFeed}
+        marketStatus={marketStatus}
+        indices={indices}
       />
 
       {/* Main Container: Android Mobile Frame or Full Screen Terminal */}

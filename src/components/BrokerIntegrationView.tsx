@@ -85,6 +85,53 @@ export const BrokerIntegrationView: React.FC = () => {
         </div>
       </div>
 
+      {/* Free Backend Proxy Active Status Banner */}
+      <div className="bg-[#181A20] border border-[#00C087]/40 rounded-xl p-4 shadow-sm bg-gradient-to-r from-[#00C087]/5 via-transparent to-transparent">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#2B3139]">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-lg bg-[#00C087]/15 text-[#00C087] border border-[#00C087]/30">
+              <Zap className="w-5 h-5 animate-pulse" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="font-extrabold text-sm text-[#EAECEF]">Free Live NSE Proxy Feed</h3>
+                <span className="px-2 py-0.5 rounded bg-[#00C087]/20 text-[#00C087] font-bold text-[10px] border border-[#00C087]/40">
+                  ACTIVE &amp; STREAMING
+                </span>
+              </div>
+              <p className="text-xs text-gray-400 mt-0.5">
+                Real-time &amp; delayed market data via built-in backend proxy using Yahoo Finance NSE symbols (No API key needed)
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="text-right">
+              <span className="text-[10px] text-gray-400 block font-mono">ENDPOINT</span>
+              <span className="text-xs font-mono text-[#F0B90B] font-bold">/api/market/live-feed</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 text-xs font-mono">
+          <div className="bg-[#1E2329] p-2.5 rounded-lg border border-[#2B3139]">
+            <span className="text-gray-500 text-[10px] block">MONITORED INDICES</span>
+            <span className="text-[#EAECEF] font-bold">^NSEI, ^NSEBANK, ^BSESN</span>
+          </div>
+          <div className="bg-[#1E2329] p-2.5 rounded-lg border border-[#2B3139]">
+            <span className="text-gray-500 text-[10px] block">NSE STOCKS</span>
+            <span className="text-[#EAECEF] font-bold">RELIANCE, TCS, HDFCBANK+</span>
+          </div>
+          <div className="bg-[#1E2329] p-2.5 rounded-lg border border-[#2B3139]">
+            <span className="text-gray-500 text-[10px] block">CACHE LATENCY</span>
+            <span className="text-[#00C087] font-bold">~8s in-memory TTL</span>
+          </div>
+          <div className="bg-[#1E2329] p-2.5 rounded-lg border border-[#2B3139]">
+            <span className="text-gray-500 text-[10px] block">AUTHENTICATION</span>
+            <span className="text-[#00C087] font-bold">Zero Keys Required</span>
+          </div>
+        </div>
+      </div>
+
       {/* Broker Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {brokers.map(b => (

@@ -13,6 +13,11 @@ import {
   BROKER_INTEGRATIONS, 
   ADMIN_SYSTEM_HEALTH 
 } from './src/data/mockMarketData.ts';
+import { 
+  fetchLiveIndianMarketData, 
+  fetchSingleSymbolLiveChart, 
+  isIndianMarketOpen 
+} from './server/marketProxy.ts';
 
 dotenv.config();
 
@@ -40,21 +45,66 @@ async function startServer() {
 
   // API Routes
   app.get('/api/health', (req, res) => {
+    const marketOpen = isIndianMarketOpen();
     res.json({ 
       status: 'ok', 
       time: new Date().toISOString(),
       exchange: 'NSE/BSE',
-      marketStatus: 'OPEN',
-      mode: 'live-paper-hybrid'
+      marketStatus: marketOpen ? 'OPEN' : 'CLOSED',
+      mode: 'live-proxy-feed',
+      source: 'Yahoo Finance Public NSE Engine'
     });
   });
 
-  app.get('/api/market/indices', (req, res) => {
-    res.json(INITIAL_INDICES);
+  // Unified Live Feed Endpoint
+  app.get('/api/market/live-feed', async (req, res) => {
+    try {
+      const data = await fetchLiveIndianMarketData();
+      res.json({
+        success: true,
+        source: 'Yahoo Finance (NSE Live/Delayed Feed)',
+        ...data
+      });
+    } catch (err: any) {
+      console.error('Error fetching live Indian market feed:', err);
+      res.status(500).json({
+        success: false,
+        error: err.message || 'Failed to fetch live market feed',
+        indices: INITIAL_INDICES,
+        stocks: INITIAL_STOCKS,
+        marketStatus: 'CLOSED'
+      });
+    }
   });
 
-  app.get('/api/market/stocks', (req, res) => {
-    res.json(INITIAL_STOCKS);
+  app.get('/api/market/indices', async (req, res) => {
+    try {
+      const data = await fetchLiveIndianMarketData();
+      res.json(data.indices);
+    } catch (err) {
+      res.json(INITIAL_INDICES);
+    }
+  });
+
+  app.get('/api/market/stocks', async (req, res) => {
+    try {
+      const data = await fetchLiveIndianMarketData();
+      res.json(data.stocks);
+    } catch (err) {
+      res.json(INITIAL_STOCKS);
+    }
+  });
+
+  app.get('/api/market/live-chart', async (req, res) => {
+    try {
+      const symbol = (req.query.symbol as string) || 'RELIANCE';
+      const range = (req.query.range as string) || '1d';
+      const interval = (req.query.interval as string) || '15m';
+      const chartData = await fetchSingleSymbolLiveChart(symbol, range, interval);
+      res.json({ success: true, data: chartData });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
   });
 
   app.get('/api/market/signals', (req, res) => {
