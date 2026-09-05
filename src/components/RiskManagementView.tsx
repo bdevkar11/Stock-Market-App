@@ -154,11 +154,11 @@ export const RiskManagementView: React.FC = () => {
           <div className="p-4 bg-[#1E2329] rounded-lg border border-[#2B3139] space-y-2 font-mono text-xs">
             <div className="flex justify-between items-center text-gray-400">
               <span>Risk Budget per Trade ({riskPercent}%):</span>
-              <span className="font-bold text-[#FF3B69]">₹{riskAmount.toFixed(0)}</span>
+              <span className="font-bold text-[#FF3B69]">₹{(riskAmount ?? 0).toFixed(0)}</span>
             </div>
             <div className="flex justify-between items-center text-gray-400">
               <span>Risk Per Share:</span>
-              <span className="font-bold text-[#EAECEF]">₹{riskPerShare.toFixed(2)}</span>
+              <span className="font-bold text-[#EAECEF]">₹{(riskPerShare ?? 0).toFixed(2)}</span>
             </div>
             <div className="flex justify-between items-center text-[#EAECEF] text-sm pt-2 border-t border-[#2B3139]">
               <span className="font-sans font-bold">Recommended Quantity:</span>
@@ -200,7 +200,7 @@ export const RiskManagementView: React.FC = () => {
             </div>
 
             <div className="flex justify-between text-[10px] text-gray-400 font-mono">
-              <span>Used: {((currentDayLoss / dailyLossLimit) * 100).toFixed(0)}%</span>
+              <span>Used: {(((currentDayLoss || 0) / (dailyLossLimit || 1)) * 100).toFixed(0)}%</span>
               <span>Headroom: ₹{(dailyLossLimit - currentDayLoss).toLocaleString('en-IN')}</span>
             </div>
           </div>

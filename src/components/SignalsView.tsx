@@ -158,17 +158,17 @@ export const SignalsView: React.FC<SignalsViewProps> = ({
                   <div>
                     <span className="text-gray-400 text-[10px] uppercase block">Entry Range</span>
                     <span className="text-[#EAECEF] font-bold">
-                      ₹{sig.entryRange[0].toFixed(0)} - ₹{sig.entryRange[1].toFixed(0)}
+                      ₹{(sig.entryRange?.[0] ?? 0).toFixed(0)} - ₹{(sig.entryRange?.[1] ?? 0).toFixed(0)}
                     </span>
                   </div>
                   <div>
                     <span className="text-gray-400 text-[10px] uppercase block">Stop Loss</span>
-                    <span className="text-[#FF3B69] font-bold">₹{sig.stopLoss.toFixed(0)}</span>
+                    <span className="text-[#FF3B69] font-bold">₹{(sig.stopLoss ?? 0).toFixed(0)}</span>
                   </div>
                   <div>
                     <span className="text-gray-400 text-[10px] uppercase block">Target 1 &amp; 2</span>
                     <span className="text-[#00C087] font-bold">
-                      ₹{sig.target1.toFixed(0)} / ₹{sig.target2.toFixed(0)}
+                      ₹{(sig.target1 ?? 0).toFixed(0)} / ₹{(sig.target2 ?? 0).toFixed(0)}
                     </span>
                   </div>
                   <div>

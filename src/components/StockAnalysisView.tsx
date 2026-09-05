@@ -101,11 +101,11 @@ export const StockAnalysisView: React.FC<StockAnalysisViewProps> = ({
           <div className="flex items-center gap-4">
             <div className="text-right font-mono">
               <div className="text-2xl sm:text-3xl font-black text-[#EAECEF]">
-                ₹{selectedStock.price.toFixed(2)}
+                ₹{(selectedStock.price ?? 0).toFixed(2)}
               </div>
               <div className={`text-xs font-bold flex items-center justify-end gap-1 ${isPos ? 'text-[#00C087]' : 'text-[#FF3B69]'}`}>
                 {isPos ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
-                {isPos ? '+' : ''}{selectedStock.change.toFixed(2)} ({isPos ? '+' : ''}{selectedStock.changePercent.toFixed(2)}%)
+                {isPos ? '+' : ''}{(selectedStock.change ?? 0).toFixed(2)} ({isPos ? '+' : ''}{(selectedStock.changePercent ?? 0).toFixed(2)}%)
               </div>
             </div>
 
@@ -133,32 +133,32 @@ export const StockAnalysisView: React.FC<StockAnalysisViewProps> = ({
         <div className="grid grid-cols-2 sm:grid-cols-6 gap-2 mt-4 pt-3 border-t border-[#2B3139] text-xs font-mono">
           <div className="bg-[#1E2329] p-2.5 rounded-lg border border-[#2B3139]">
             <span className="text-gray-400 text-[10px] block uppercase">Open</span>
-            <span className="font-bold text-[#EAECEF]">₹{selectedStock.open.toFixed(2)}</span>
+            <span className="font-bold text-[#EAECEF]">₹{(selectedStock.open ?? 0).toFixed(2)}</span>
           </div>
           <div className="bg-[#1E2329] p-2.5 rounded-lg border border-[#2B3139]">
             <span className="text-gray-400 text-[10px] block uppercase">High</span>
-            <span className="font-bold text-[#00C087]">₹{selectedStock.high.toFixed(2)}</span>
+            <span className="font-bold text-[#00C087]">₹{(selectedStock.high ?? 0).toFixed(2)}</span>
           </div>
           <div className="bg-[#1E2329] p-2.5 rounded-lg border border-[#2B3139]">
             <span className="text-gray-400 text-[10px] block uppercase">Low</span>
-            <span className="font-bold text-[#FF3B69]">₹{selectedStock.low.toFixed(2)}</span>
+            <span className="font-bold text-[#FF3B69]">₹{(selectedStock.low ?? 0).toFixed(2)}</span>
           </div>
           <div className="bg-[#1E2329] p-2.5 rounded-lg border border-[#2B3139]">
             <span className="text-gray-400 text-[10px] block uppercase">Prev Close</span>
-            <span className="font-bold text-gray-300">₹{selectedStock.prevClose.toFixed(2)}</span>
+            <span className="font-bold text-gray-300">₹{(selectedStock.prevClose ?? 0).toFixed(2)}</span>
           </div>
           <div className="bg-[#1E2329] p-2.5 rounded-lg border border-[#2B3139]">
             <span className="text-gray-400 text-[10px] block uppercase">52W Range</span>
             <span className="font-bold text-gray-300 text-[11px]">
-              ₹{selectedStock.week52Low.toFixed(0)} - ₹{selectedStock.week52High.toFixed(0)}
+              ₹{(selectedStock.week52Low ?? 0).toFixed(0)} - ₹{(selectedStock.week52High ?? 0).toFixed(0)}
             </span>
           </div>
           <div className="bg-[#1E2329] p-2.5 rounded-lg border border-[#2B3139]">
             <span className="text-gray-400 text-[10px] block uppercase">Trend Status</span>
             <span className={`font-bold text-[11px] ${
-              tech.trendDirection === 'Bullish' ? 'text-[#00C087]' : tech.trendDirection === 'Bearish' ? 'text-[#FF3B69]' : 'text-gray-300'
+              tech?.trendDirection === 'Bullish' ? 'text-[#00C087]' : tech?.trendDirection === 'Bearish' ? 'text-[#FF3B69]' : 'text-gray-300'
             }`}>
-              {tech.trendDirection}
+              {tech?.trendDirection || 'Neutral'}
             </span>
           </div>
         </div>
@@ -236,31 +236,31 @@ export const StockAnalysisView: React.FC<StockAnalysisViewProps> = ({
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono text-xs">
               <div className="p-3 bg-[#1E2329] rounded-lg border border-[#2B3139]">
                 <span className="text-gray-400 text-[10px] block uppercase">9 EMA (Ultra Short)</span>
-                <span className="font-bold text-[#EAECEF] text-sm">₹{tech.ema9.toFixed(2)}</span>
+                <span className="font-bold text-[#EAECEF] text-sm">₹{(tech?.ema9 ?? 0).toFixed(2)}</span>
                 <span className="text-[10px] text-[#00C087] block mt-0.5">
-                  {selectedStock.price > tech.ema9 ? 'Trading Above (Bullish)' : 'Trading Below'}
+                  {selectedStock.price > (tech?.ema9 ?? 0) ? 'Trading Above (Bullish)' : 'Trading Below'}
                 </span>
               </div>
 
               <div className="p-3 bg-[#1E2329] rounded-lg border border-[#2B3139]">
                 <span className="text-gray-400 text-[10px] block uppercase">20 EMA (Short-Term)</span>
-                <span className="font-bold text-[#EAECEF] text-sm">₹{tech.ema20.toFixed(2)}</span>
+                <span className="font-bold text-[#EAECEF] text-sm">₹{(tech?.ema20 ?? 0).toFixed(2)}</span>
                 <span className="text-[10px] text-[#00C087] block mt-0.5">
-                  {selectedStock.price > tech.ema20 ? 'Strong Support Active' : 'Under Pressure'}
+                  {selectedStock.price > (tech?.ema20 ?? 0) ? 'Strong Support Active' : 'Under Pressure'}
                 </span>
               </div>
 
               <div className="p-3 bg-[#1E2329] rounded-lg border border-[#2B3139]">
                 <span className="text-gray-400 text-[10px] block uppercase">50 EMA (Medium-Term)</span>
-                <span className="font-bold text-[#EAECEF] text-sm">₹{tech.ema50.toFixed(2)}</span>
+                <span className="font-bold text-[#EAECEF] text-sm">₹{(tech?.ema50 ?? 0).toFixed(2)}</span>
                 <span className="text-[10px] text-gray-400 block mt-0.5">
-                  Cross Margin: +₹{(tech.ema20 - tech.ema50).toFixed(1)}
+                  Cross Margin: +₹{((tech?.ema20 ?? 0) - (tech?.ema50 ?? 0)).toFixed(1)}
                 </span>
               </div>
 
               <div className="p-3 bg-[#1E2329] rounded-lg border border-[#2B3139]">
                 <span className="text-gray-400 text-[10px] block uppercase">200 EMA (Baseline)</span>
-                <span className="font-bold text-[#EAECEF] text-sm">₹{tech.ema200.toFixed(2)}</span>
+                <span className="font-bold text-[#EAECEF] text-sm">₹{(tech?.ema200 ?? 0).toFixed(2)}</span>
                 <span className="text-[10px] text-[#F0B90B] block mt-0.5">
                   Long-Term Trend Baseline
                 </span>
@@ -273,15 +273,15 @@ export const StockAnalysisView: React.FC<StockAnalysisViewProps> = ({
                 <div className="flex justify-between items-center mb-1 text-xs">
                   <span className="text-gray-400 font-semibold">RSI (14 Period)</span>
                   <span className={`font-mono font-bold ${
-                    tech.rsi > 70 ? 'text-[#F0B90B]' : tech.rsi < 30 ? 'text-[#3772FF]' : 'text-[#00C087]'
+                    (tech?.rsi ?? 50) > 70 ? 'text-[#F0B90B]' : (tech?.rsi ?? 50) < 30 ? 'text-[#3772FF]' : 'text-[#00C087]'
                   }`}>
-                    {tech.rsi.toFixed(1)} ({tech.rsi > 70 ? 'Overbought' : tech.rsi < 30 ? 'Oversold' : 'Healthy Zone'})
+                    {(tech?.rsi ?? 50).toFixed(1)} ({(tech?.rsi ?? 50) > 70 ? 'Overbought' : (tech?.rsi ?? 50) < 30 ? 'Oversold' : 'Healthy Zone'})
                   </span>
                 </div>
                 <div className="w-full bg-[#0B0E11] h-2 rounded-full overflow-hidden mt-2 border border-[#2B3139]">
                   <div 
                     className="h-full bg-gradient-to-r from-[#00C087] via-[#F0B90B] to-[#FF3B69]" 
-                    style={{ width: `${Math.min(100, Math.max(0, tech.rsi))}%` }}
+                    style={{ width: `${Math.min(100, Math.max(0, tech?.rsi ?? 50))}%` }}
                   />
                 </div>
               </div>
@@ -289,10 +289,10 @@ export const StockAnalysisView: React.FC<StockAnalysisViewProps> = ({
               <div className="p-3 bg-[#1E2329] rounded-lg border border-[#2B3139] font-mono text-xs">
                 <span className="text-gray-400 font-semibold block mb-1">MACD (12, 26, 9)</span>
                 <div className="flex justify-between text-[11px] text-gray-300">
-                  <span>MACD: <strong className="text-[#00C087]">{tech.macd.macd.toFixed(2)}</strong></span>
-                  <span>Signal: <strong>{tech.macd.signal.toFixed(2)}</strong></span>
-                  <span>Hist: <strong className={tech.macd.histogram >= 0 ? 'text-[#00C087]' : 'text-[#FF3B69]'}>
-                    {tech.macd.histogram.toFixed(2)}
+                  <span>MACD: <strong className="text-[#00C087]">{(tech?.macd?.macd ?? 0).toFixed(2)}</strong></span>
+                  <span>Signal: <strong>{(tech?.macd?.signal ?? 0).toFixed(2)}</strong></span>
+                  <span>Hist: <strong className={(tech?.macd?.histogram ?? 0) >= 0 ? 'text-[#00C087]' : 'text-[#FF3B69]'}>
+                    {(tech?.macd?.histogram ?? 0).toFixed(2)}
                   </strong></span>
                 </div>
               </div>
@@ -300,9 +300,9 @@ export const StockAnalysisView: React.FC<StockAnalysisViewProps> = ({
               <div className="p-3 bg-[#1E2329] rounded-lg border border-[#2B3139] font-mono text-xs">
                 <span className="text-gray-400 font-semibold block mb-1">Bollinger Bands &amp; ATR</span>
                 <div className="flex justify-between text-[11px] text-gray-300">
-                  <span>ATR: <strong>₹{tech.atr.toFixed(1)}</strong></span>
-                  <span>Upper: <strong>₹{tech.bollinger.upper.toFixed(0)}</strong></span>
-                  <span>Lower: <strong>₹{tech.bollinger.lower.toFixed(0)}</strong></span>
+                  <span>ATR: <strong>₹{(tech?.atr ?? 0).toFixed(1)}</strong></span>
+                  <span>Upper: <strong>₹{(tech?.bollinger?.upper ?? 0).toFixed(0)}</strong></span>
+                  <span>Lower: <strong>₹{(tech?.bollinger?.lower ?? 0).toFixed(0)}</strong></span>
                 </div>
               </div>
             </div>
@@ -315,23 +315,23 @@ export const StockAnalysisView: React.FC<StockAnalysisViewProps> = ({
             <div className="grid grid-cols-5 gap-2 text-center">
               <div className="p-2.5 rounded-lg bg-[#FF3B69]/10 border border-[#FF3B69]/30">
                 <span className="text-[#FF3B69] text-[10px] block uppercase font-bold">Resistance 2 (R2)</span>
-                <span className="text-sm font-bold text-[#EAECEF]">₹{tech.pivots.r2.toFixed(2)}</span>
+                <span className="text-sm font-bold text-[#EAECEF]">₹{(tech?.pivots?.r2 ?? 0).toFixed(2)}</span>
               </div>
               <div className="p-2.5 rounded-lg bg-[#FF3B69]/10 border border-[#FF3B69]/20">
                 <span className="text-[#FF3B69] text-[10px] block uppercase font-bold">Resistance 1 (R1)</span>
-                <span className="text-sm font-bold text-[#EAECEF]">₹{tech.pivots.r1.toFixed(2)}</span>
+                <span className="text-sm font-bold text-[#EAECEF]">₹{(tech?.pivots?.r1 ?? 0).toFixed(2)}</span>
               </div>
               <div className="p-2.5 rounded-lg bg-[#1E2329] border border-[#2B3139]">
                 <span className="text-gray-400 text-[10px] block uppercase font-bold">Pivot Point (PP)</span>
-                <span className="text-sm font-bold text-[#F0B90B]">₹{tech.pivots.pivot.toFixed(2)}</span>
+                <span className="text-sm font-bold text-[#F0B90B]">₹{(tech?.pivots?.pivot ?? 0).toFixed(2)}</span>
               </div>
               <div className="p-2.5 rounded-lg bg-[#00C087]/10 border border-[#00C087]/20">
                 <span className="text-[#00C087] text-[10px] block uppercase font-bold">Support 1 (S1)</span>
-                <span className="text-sm font-bold text-[#EAECEF]">₹{tech.pivots.s1.toFixed(2)}</span>
+                <span className="text-sm font-bold text-[#EAECEF]">₹{(tech?.pivots?.s1 ?? 0).toFixed(2)}</span>
               </div>
               <div className="p-2.5 rounded-lg bg-[#00C087]/10 border border-[#00C087]/30">
                 <span className="text-[#00C087] text-[10px] block uppercase font-bold">Support 2 (S2)</span>
-                <span className="text-sm font-bold text-[#EAECEF]">₹{tech.pivots.s2.toFixed(2)}</span>
+                <span className="text-sm font-bold text-[#EAECEF]">₹{(tech?.pivots?.s2 ?? 0).toFixed(2)}</span>
               </div>
             </div>
 
@@ -391,9 +391,9 @@ export const StockAnalysisView: React.FC<StockAnalysisViewProps> = ({
 
               <div className="p-3 bg-[#1E2329] rounded-lg border border-[#2B3139]">
                 <span className="text-gray-400 text-[10px] uppercase block">Total Traded Volume</span>
-                <span className="text-xl font-bold text-[#EAECEF]">{(selectedStock.volume / 100000).toFixed(2)} Lakh</span>
+                <span className="text-xl font-bold text-[#EAECEF]">{((selectedStock.volume ?? 0) / 100000).toFixed(2)} Lakh</span>
                 <span className="text-[10px] text-gray-400 block mt-1">
-                  Ratio to 20-DMA: <strong className="text-[#00C087]">{tech.volumeRatio20DMA}x</strong>
+                  Ratio to 20-DMA: <strong className="text-[#00C087]">{tech?.volumeRatio20DMA ?? 1.1}x</strong>
                 </span>
               </div>
 

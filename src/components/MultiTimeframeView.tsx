@@ -15,13 +15,14 @@ export const MultiTimeframeView: React.FC<MultiTimeframeViewProps> = ({
 }) => {
   const [selectedStock, setSelectedStock] = useState<StockQuote>(stocks[0]);
 
+  const activeStock = selectedStock || stocks[0];
   const timeframes: Timeframe[] = ['1m', '5m', '15m', '30m', '1h', '1d', '1w'];
 
   // Calculate consensus for the selected stock
-  const trends = Object.values(selectedStock.timeframeTrend);
+  const trends = activeStock?.timeframeTrend ? Object.values(activeStock.timeframeTrend) : ['Bullish'];
   const bullishCount = trends.filter(t => t === 'Bullish').length;
   const bearishCount = trends.filter(t => t === 'Bearish').length;
-  const totalCount = trends.length;
+  const totalCount = trends.length || 1;
   const consensusPct = Math.round((Math.max(bullishCount, bearishCount) / totalCount) * 100);
   const dominantTrend = bullishCount >= bearishCount ? 'Bullish' : 'Bearish';
 
@@ -49,12 +50,12 @@ export const MultiTimeframeView: React.FC<MultiTimeframeViewProps> = ({
             key={st.symbol}
             onClick={() => setSelectedStock(st)}
             className={`px-3.5 py-2 rounded-lg text-xs font-mono font-bold transition-all shrink-0 cursor-pointer ${
-              selectedStock.symbol === st.symbol
+              activeStock?.symbol === st.symbol
                 ? 'bg-[#F0B90B]/20 text-[#F0B90B] border border-[#F0B90B]/50 shadow-sm'
                 : 'bg-[#181A20] text-gray-400 hover:text-[#EAECEF] border border-[#2B3139]'
             }`}
           >
-            {st.symbol} (₹{st.price.toFixed(0)})
+            {st.symbol} (₹{(st.price ?? 0).toFixed(0)})
           </button>
         ))}
       </div>
@@ -64,10 +65,10 @@ export const MultiTimeframeView: React.FC<MultiTimeframeViewProps> = ({
         <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-[#2B3139]">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-xl font-black text-[#EAECEF] font-mono">{selectedStock.symbol}</h2>
-              <span className="text-xs text-gray-400 font-mono">₹{selectedStock.price.toFixed(2)}</span>
+              <h2 className="text-xl font-black text-[#EAECEF] font-mono">{activeStock?.symbol}</h2>
+              <span className="text-xs text-gray-400 font-mono">₹{(activeStock?.price ?? 0).toFixed(2)}</span>
             </div>
-            <p className="text-xs text-gray-400">{selectedStock.name}</p>
+            <p className="text-xs text-gray-400">{activeStock?.name}</p>
           </div>
 
           {/* Computed Consensus Score */}
@@ -176,10 +177,10 @@ export const MultiTimeframeView: React.FC<MultiTimeframeViewProps> = ({
                       {st.symbol}
                     </td>
                     <td className="py-2 px-2 text-gray-300">
-                      ₹{st.price.toFixed(1)}
+                      ₹{(st.price ?? 0).toFixed(1)}
                     </td>
                     {timeframes.map(tf => {
-                      const t = st.timeframeTrend[tf];
+                      const t = st.timeframeTrend?.[tf] || 'Neutral';
                       return (
                         <td key={tf} className="py-2 px-1">
                           <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${

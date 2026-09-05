@@ -287,9 +287,17 @@ export async function fetchLiveIndianMarketData() {
   const indices = indexResults.filter((i): i is MarketIndex => i !== null);
   const stocks = stockResults.filter((s): s is StockQuote => s !== null);
 
-  // If both empty, use initial data
-  const finalIndices = indices.length > 0 ? indices : INITIAL_INDICES;
-  const finalStocks = stocks.length > 0 ? stocks : INITIAL_STOCKS;
+  // Merge live indices with INITIAL_INDICES so all sector and broad indices are always present
+  const finalIndices = INITIAL_INDICES.map(initIdx => {
+    const live = indices.find(i => i.symbol === initIdx.symbol);
+    return live || initIdx;
+  });
+
+  // Merge live stocks with INITIAL_STOCKS so all stock symbols (including TATAMOTORS, MARUTI) are always present
+  const finalStocks = INITIAL_STOCKS.map(initStk => {
+    const live = stocks.find(s => s.symbol === initStk.symbol);
+    return live || initStk;
+  });
 
   cache = {
     indices: finalIndices,

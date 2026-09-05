@@ -192,10 +192,10 @@ export const PerformanceView: React.FC = () => {
                         {l.action}
                       </span>
                     </td>
-                    <td className="py-2.5 px-2 text-gray-300">₹{l.entryPrice.toFixed(1)}</td>
-                    <td className="py-2.5 px-2 text-[#EAECEF] font-bold">₹{l.exitPrice.toFixed(1)}</td>
+                    <td className="py-2.5 px-2 text-gray-300">₹{(l.entryPrice ?? 0).toFixed(1)}</td>
+                    <td className="py-2.5 px-2 text-[#EAECEF] font-bold">₹{(l.exitPrice ?? 0).toFixed(1)}</td>
                     <td className={`py-2.5 px-2 font-black ${isWin ? 'text-[#00C087]' : 'text-[#FF3B69]'}`}>
-                      {isWin ? '+' : ''}{l.returnPercent.toFixed(2)}%
+                      {isWin ? '+' : ''}{(l.returnPercent ?? 0).toFixed(2)}%
                     </td>
                     <td className="py-2.5 px-2">
                       <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${

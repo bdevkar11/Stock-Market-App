@@ -2,5 +2,7 @@
   "name": "NSE F&O AI Trading & Analysis",
   "description": "Professional Indian stock market and F&O trading terminal with multi-timeframe technical analysis, option chain Greeks, and explainable AI buy/sell signals.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }

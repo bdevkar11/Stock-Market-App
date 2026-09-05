@@ -84,7 +84,7 @@ export const OrderModal: React.FC<OrderModalProps> = ({
               {side}
             </span>
             <span className="font-extrabold text-base text-[#EAECEF]">{stock.symbol}</span>
-            <span className="text-xs text-gray-400 font-mono">NSE • ₹{stock.price.toFixed(2)}</span>
+            <span className="text-xs text-gray-400 font-mono">NSE • ₹{(stock?.price ?? 0).toFixed(2)}</span>
           </div>
 
           <button 

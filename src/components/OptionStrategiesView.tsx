@@ -76,15 +76,15 @@ export const OptionStrategiesView: React.FC = () => {
                   <div className="grid grid-cols-3 gap-2 my-3 p-2.5 bg-[#1E2329] rounded-lg border border-[#2B3139] font-mono text-center text-xs">
                     <div>
                       <span className="text-gray-400 text-[10px] uppercase block">Entry Premium</span>
-                      <span className="text-[#EAECEF] font-bold">₹{strat.entryPremium.toFixed(2)}</span>
+                      <span className="text-[#EAECEF] font-bold">₹{(strat.entryPremium ?? 0).toFixed(2)}</span>
                     </div>
                     <div>
                       <span className="text-gray-400 text-[10px] uppercase block">Stop Loss</span>
-                      <span className="text-[#FF3B69] font-bold">₹{strat.stopLossPremium.toFixed(2)}</span>
+                      <span className="text-[#FF3B69] font-bold">₹{(strat.stopLossPremium ?? 0).toFixed(2)}</span>
                     </div>
                     <div>
                       <span className="text-gray-400 text-[10px] uppercase block">Target</span>
-                      <span className="text-[#00C087] font-bold">₹{strat.targetPremium.toFixed(2)}</span>
+                      <span className="text-[#00C087] font-bold">₹{(strat.targetPremium ?? 0).toFixed(2)}</span>
                     </div>
                   </div>
                 ) : (

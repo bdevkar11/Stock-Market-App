@@ -147,7 +147,7 @@ export const OptionChainView: React.FC<OptionChainViewProps> = ({ onNavigateTab 
           <div className="p-2.5 rounded-lg bg-[#1E2329] border border-[#2B3139] col-span-2 sm:col-span-1">
             <span className="text-[10px] text-gray-400 uppercase block">Futures Basis</span>
             <div className="text-base font-extrabold text-[#3772FF] mt-1">
-              +{optionChain.futuresBasis.toFixed(1)} pts
+              +{(optionChain.futuresBasis ?? 0).toFixed(1)} pts
             </div>
             <span className="text-[10px] text-[#00C087] block mt-0.5 font-bold">
               {optionChain.oiBuildup}
@@ -228,35 +228,35 @@ export const OptionChainView: React.FC<OptionChainViewProps> = ({ onNavigateTab 
                         style={{ width: `${callOIWidth}%` }}
                       />
                       <span className="relative z-10 text-gray-300 font-medium">
-                        {(s.calls.oi / 1000).toFixed(1)}k
+                        {(((s.calls?.oi ?? 0)) / 1000).toFixed(1)}k
                       </span>
                     </td>
 
-                    <td className={`py-2 px-2 ${s.calls.oiChange >= 0 ? 'text-[#00C087]' : 'text-[#FF3B69]'}`}>
-                      {s.calls.oiChange >= 0 ? '+' : ''}{(s.calls.oiChange / 1000).toFixed(1)}k
+                    <td className={`py-2 px-2 ${(s.calls?.oiChange ?? 0) >= 0 ? 'text-[#00C087]' : 'text-[#FF3B69]'}`}>
+                      {(s.calls?.oiChange ?? 0) >= 0 ? '+' : ''}{(((s.calls?.oiChange ?? 0)) / 1000).toFixed(1)}k
                     </td>
 
                     <td className="py-2 px-2 text-gray-400">
-                      {(s.calls.volume / 1000).toFixed(0)}k
+                      {(((s.calls?.volume ?? 0)) / 1000).toFixed(0)}k
                     </td>
 
                     <td className="py-2 px-2 text-gray-400">
-                      {s.calls.iv}%
+                      {s.calls?.iv ?? 15}%
                     </td>
 
                     {showGreeks && (
                       <td className="py-2 px-1 text-[#F0B90B] font-bold">
-                        {s.calls.delta}
+                        {s.calls?.delta ?? 0.5}
                       </td>
                     )}
                     {showGreeks && (
                       <td className="py-2 px-1 text-gray-400">
-                        {s.calls.theta}
+                        {s.calls?.theta ?? -5}
                       </td>
                     )}
 
                     <td className={`py-2 px-2 font-bold ${isCallITM ? 'text-[#00C087]' : 'text-[#EAECEF]'}`}>
-                      ₹{s.calls.ltp.toFixed(2)}
+                      ₹{(s.calls?.ltp ?? 0).toFixed(2)}
                     </td>
 
                     {/* STRIKE PRICE */}
@@ -271,30 +271,30 @@ export const OptionChainView: React.FC<OptionChainViewProps> = ({ onNavigateTab 
 
                     {/* PUTS */}
                     <td className={`py-2 px-2 font-bold ${isPutITM ? 'text-[#FF3B69]' : 'text-[#EAECEF]'}`}>
-                      ₹{s.puts.ltp.toFixed(2)}
+                      ₹{(s.puts?.ltp ?? 0).toFixed(2)}
                     </td>
 
                     {showGreeks && (
                       <td className="py-2 px-1 text-[#F0B90B] font-bold">
-                        {s.puts.delta}
+                        {s.puts?.delta ?? -0.5}
                       </td>
                     )}
                     {showGreeks && (
                       <td className="py-2 px-1 text-gray-400">
-                        {s.puts.theta}
+                        {s.puts?.theta ?? -5}
                       </td>
                     )}
 
                     <td className="py-2 px-2 text-gray-400">
-                      {s.puts.iv}%
+                      {s.puts?.iv ?? 15}%
                     </td>
 
                     <td className="py-2 px-2 text-gray-400">
-                      {(s.puts.volume / 1000).toFixed(0)}k
+                      {(((s.puts?.volume ?? 0)) / 1000).toFixed(0)}k
                     </td>
 
-                    <td className={`py-2 px-2 ${s.puts.oiChange >= 0 ? 'text-[#00C087]' : 'text-[#FF3B69]'}`}>
-                      {s.puts.oiChange >= 0 ? '+' : ''}{(s.puts.oiChange / 1000).toFixed(1)}k
+                    <td className={`py-2 px-2 ${(s.puts?.oiChange ?? 0) >= 0 ? 'text-[#00C087]' : 'text-[#FF3B69]'}`}>
+                      {(s.puts?.oiChange ?? 0) >= 0 ? '+' : ''}{(((s.puts?.oiChange ?? 0)) / 1000).toFixed(1)}k
                     </td>
 
                     <td className={`py-2 px-2 relative ${isPutITM ? 'bg-[#FF3B69]/5' : ''}`}>
@@ -303,7 +303,7 @@ export const OptionChainView: React.FC<OptionChainViewProps> = ({ onNavigateTab 
                         style={{ width: `${putOIWidth}%` }}
                       />
                       <span className="relative z-10 text-gray-300 font-medium">
-                        {(s.puts.oi / 1000).toFixed(1)}k
+                        {(((s.puts?.oi ?? 0)) / 1000).toFixed(1)}k
                       </span>
                     </td>
                   </tr>

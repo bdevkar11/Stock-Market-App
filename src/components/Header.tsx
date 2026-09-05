@@ -171,19 +171,19 @@ export const Header: React.FC<HeaderProps> = ({
             <div className="flex flex-col">
               <span className="text-[10px] text-gray-500 uppercase font-semibold tracking-wider">NIFTY 50</span>
               <span className={`text-xs font-mono font-bold ${(niftyIndex?.change ?? 0) >= 0 ? 'text-[#00C087]' : 'text-[#FF3B69]'}`}>
-                {niftyIndex ? niftyIndex.value.toLocaleString('en-IN') : '23,897.70'} ({niftyIndex ? (niftyIndex.change >= 0 ? '+' : '') + niftyIndex.changePercent + '%' : '+0.58%'})
+                {niftyIndex ? (niftyIndex.value ?? 0).toLocaleString('en-IN') : '23,897.70'} ({niftyIndex ? ((niftyIndex.change ?? 0) >= 0 ? '+' : '') + (niftyIndex.changePercent ?? 0).toFixed(2) + '%' : '+0.58%'})
               </span>
             </div>
             <div className="flex flex-col">
               <span className="text-[10px] text-gray-500 uppercase font-semibold tracking-wider">BANK NIFTY</span>
               <span className={`text-xs font-mono font-bold ${(bankNiftyIndex?.change ?? 0) >= 0 ? 'text-[#00C087]' : 'text-[#FF3B69]'}`}>
-                {bankNiftyIndex ? bankNiftyIndex.value.toLocaleString('en-IN') : '51,280.45'} ({bankNiftyIndex ? (bankNiftyIndex.change >= 0 ? '+' : '') + bankNiftyIndex.changePercent + '%' : '+0.76%'})
+                {bankNiftyIndex ? (bankNiftyIndex.value ?? 0).toLocaleString('en-IN') : '51,280.45'} ({bankNiftyIndex ? ((bankNiftyIndex.change ?? 0) >= 0 ? '+' : '') + (bankNiftyIndex.changePercent ?? 0).toFixed(2) + '%' : '+0.76%'})
               </span>
             </div>
             <div className="flex flex-col">
               <span className="text-[10px] text-gray-500 uppercase font-semibold tracking-wider">SENSEX</span>
               <span className={`text-xs font-mono font-bold ${(sensexIndex?.change ?? 0) >= 0 ? 'text-[#00C087]' : 'text-[#FF3B69]'}`}>
-                {sensexIndex ? sensexIndex.value.toLocaleString('en-IN') : '76,515.40'} ({sensexIndex ? (sensexIndex.change >= 0 ? '+' : '') + sensexIndex.changePercent + '%' : '+0.51%'})
+                {sensexIndex ? (sensexIndex.value ?? 0).toLocaleString('en-IN') : '76,515.40'} ({sensexIndex ? ((sensexIndex.change ?? 0) >= 0 ? '+' : '') + (sensexIndex.changePercent ?? 0).toFixed(2) + '%' : '+0.51%'})
               </span>
             </div>
           </div>
@@ -257,7 +257,7 @@ export const Header: React.FC<HeaderProps> = ({
             <div className="text-right">
               <span className="text-[9px] text-gray-500 block leading-none font-mono">PAPER</span>
               <span className="font-mono font-bold text-[#EAECEF] text-xs">
-                ₹{(virtualBalance / 100000).toFixed(2)}L
+                ₹{((virtualBalance ?? 0) / 100000).toFixed(2)}L
               </span>
             </div>
           </button>

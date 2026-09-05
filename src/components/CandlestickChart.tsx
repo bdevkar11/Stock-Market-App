@@ -132,11 +132,11 @@ export const CandlestickChart: React.FC<Props> = ({ candles, technicals, symbol,
       {/* OHLC Bar */}
       <div className="flex flex-wrap items-center gap-4 py-2 text-xs font-mono text-gray-400 border-b border-[#2B3139]">
         <span className="text-[#EAECEF] font-semibold">{symbol}</span>
-        <span>O: <span className="text-[#EAECEF]">₹{activeCandle?.open.toFixed(2)}</span></span>
-        <span>H: <span className="text-[#00C087]">₹{activeCandle?.high.toFixed(2)}</span></span>
-        <span>L: <span className="text-[#FF3B69]">₹{activeCandle?.low.toFixed(2)}</span></span>
-        <span>C: <span className={activeCandle?.close >= activeCandle?.open ? 'text-[#00C087] font-bold' : 'text-[#FF3B69] font-bold'}>₹{activeCandle?.close.toFixed(2)}</span></span>
-        <span>Vol: <span className="text-gray-300">{(activeCandle?.volume / 1000).toFixed(1)}k</span></span>
+        <span>O: <span className="text-[#EAECEF]">₹{(activeCandle?.open ?? 0).toFixed(2)}</span></span>
+        <span>H: <span className="text-[#00C087]">₹{(activeCandle?.high ?? 0).toFixed(2)}</span></span>
+        <span>L: <span className="text-[#FF3B69]">₹{(activeCandle?.low ?? 0).toFixed(2)}</span></span>
+        <span>C: <span className={(activeCandle?.close ?? 0) >= (activeCandle?.open ?? 0) ? 'text-[#00C087] font-bold' : 'text-[#FF3B69] font-bold'}>₹{(activeCandle?.close ?? 0).toFixed(2)}</span></span>
+        <span>Vol: <span className="text-gray-300">{((activeCandle?.volume ?? 0) / 1000).toFixed(1)}k</span></span>
         {activeCandle?.time && <span className="text-gray-500 ml-auto">{activeCandle.time} IST</span>}
       </div>
 
@@ -430,14 +430,14 @@ export const CandlestickChart: React.FC<Props> = ({ candles, technicals, symbol,
               />
               <text
                 x={svgWidth - 30}
-                y={getY(activeCandle.close) + 4}
+                y={getY(activeCandle?.close ?? currentPrice) + 4}
                 fill="#0f172a"
                 fontSize="10"
                 fontWeight="bold"
                 textAnchor="middle"
                 fontFamily="JetBrains Mono"
               >
-                ₹{activeCandle.close.toFixed(0)}
+                ₹{(activeCandle?.close ?? 0).toFixed(0)}
               </text>
             </g>
           )}
@@ -445,16 +445,16 @@ export const CandlestickChart: React.FC<Props> = ({ candles, technicals, symbol,
           {/* Current Live Price Line */}
           <line
             x1="10"
-            y1={getY(currentPrice)}
+            y1={getY(currentPrice || 0)}
             x2={svgWidth - 55}
-            y2={getY(currentPrice)}
+            y2={getY(currentPrice || 0)}
             stroke="#10b981"
             strokeDasharray="2,2"
             strokeWidth="1.2"
           />
           <rect
             x={svgWidth - 54}
-            y={getY(currentPrice) - 9}
+            y={getY(currentPrice || 0) - 9}
             width="50"
             height="18"
             fill="#10b981"
@@ -462,14 +462,14 @@ export const CandlestickChart: React.FC<Props> = ({ candles, technicals, symbol,
           />
           <text
             x={svgWidth - 29}
-            y={getY(currentPrice) + 4}
+            y={getY(currentPrice || 0) + 4}
             fill="#ffffff"
             fontSize="10"
             fontWeight="bold"
             textAnchor="middle"
             fontFamily="JetBrains Mono"
           >
-            ₹{currentPrice.toFixed(0)}
+            ₹{(currentPrice ?? 0).toFixed(0)}
           </text>
         </svg>
       </div>
@@ -478,16 +478,16 @@ export const CandlestickChart: React.FC<Props> = ({ candles, technicals, symbol,
       <div className="flex flex-wrap items-center justify-between text-xs text-slate-400 pt-2 border-t border-slate-800/40 mt-1">
         <div className="flex items-center gap-4 font-mono text-[11px]">
           <span className="flex items-center gap-1">
-            <span className="w-2.5 h-0.5 bg-amber-400"></span> 20 EMA: ₹{technicals.ema20.toFixed(1)}
+            <span className="w-2.5 h-0.5 bg-amber-400"></span> 20 EMA: ₹{(technicals?.ema20 ?? 0).toFixed(1)}
           </span>
           <span className="flex items-center gap-1">
-            <span className="w-2.5 h-0.5 bg-cyan-400"></span> VWAP: ₹{technicals.vwap.toFixed(1)}
+            <span className="w-2.5 h-0.5 bg-cyan-400"></span> VWAP: ₹{(technicals?.vwap ?? 0).toFixed(1)}
           </span>
           <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-purple-400"></span> RSI (14): {technicals.rsi.toFixed(1)}
+            <span className="w-2.5 h-2 rounded-full bg-purple-400"></span> RSI (14): {(technicals?.rsi ?? 50).toFixed(1)}
           </span>
           <span className="flex items-center gap-1">
-            ATR: ₹{technicals.atr.toFixed(1)}
+            ATR: ₹{(technicals?.atr ?? 0).toFixed(1)}
           </span>
         </div>
 

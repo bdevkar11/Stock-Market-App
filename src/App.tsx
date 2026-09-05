@@ -155,11 +155,13 @@ export default function App() {
       const interval = setInterval(() => {
         setStocks(prev => prev.map(s => {
           const deltaPct = (Math.random() - 0.49) * 0.0016;
-          const newPrice = +(s.price * (1 + deltaPct)).toFixed(2);
-          const newHigh = Math.max(s.high, newPrice);
-          const newLow = Math.min(s.low, newPrice);
-          const newChange = +(newPrice - s.prevClose).toFixed(2);
-          const newChangePercent = +((newChange / s.prevClose) * 100).toFixed(2);
+          const currentP = s.price || 100;
+          const pClose = s.prevClose || currentP;
+          const newPrice = +(currentP * (1 + deltaPct)).toFixed(2);
+          const newHigh = Math.max(s.high ?? newPrice, newPrice);
+          const newLow = Math.min(s.low ?? newPrice, newPrice);
+          const newChange = +(newPrice - pClose).toFixed(2);
+          const newChangePercent = +((newChange / (pClose || 1)) * 100).toFixed(2);
 
           return {
             ...s,

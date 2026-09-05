@@ -81,29 +81,29 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     {idx.name}
                   </span>
                   <span className={`text-[11px] font-mono font-bold flex items-center ${isPos ? 'text-[#00C087]' : 'text-[#FF3B69]'}`}>
-                    {isPos ? '+' : ''}{idx.changePercent.toFixed(2)}%
+                    {isPos ? '+' : ''}{(idx.changePercent ?? 0).toFixed(2)}%
                   </span>
                 </div>
 
                 <div className="flex items-baseline justify-between mt-1">
                   <span className="text-base font-extrabold font-mono text-[#EAECEF]">
-                    {idx.value.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    {(idx.value ?? 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                   </span>
                   <span className={`text-[11px] font-mono ${isPos ? 'text-[#00C087]' : 'text-[#FF3B69]'}`}>
-                    {isPos ? '+' : ''}{idx.change.toFixed(1)}
+                    {isPos ? '+' : ''}{(idx.change ?? 0).toFixed(1)}
                   </span>
                 </div>
 
                 {/* Range Bar */}
                 <div className="mt-2 text-[10px] text-gray-500 flex items-center justify-between font-mono">
-                  <span>L: {idx.low.toFixed(0)}</span>
+                  <span>L: {(idx.low ?? 0).toFixed(0)}</span>
                   <div className="w-16 h-1 bg-[#2B3139] rounded-full overflow-hidden mx-1">
                     <div 
                       className={`h-full ${isPos ? 'bg-[#00C087]' : 'bg-[#FF3B69]'}`} 
-                      style={{ width: `${Math.min(100, Math.max(10, ((idx.value - idx.low) / (idx.high - idx.low || 1)) * 100))}%` }}
+                      style={{ width: `${Math.min(100, Math.max(10, (((idx.value ?? 0) - (idx.low ?? 0)) / ((idx.high ?? 0) - (idx.low ?? 0) || 1)) * 100))}%` }}
                     />
                   </div>
-                  <span>H: {idx.high.toFixed(0)}</span>
+                  <span>H: {(idx.high ?? 0).toFixed(0)}</span>
                 </div>
               </div>
             );
@@ -118,9 +118,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               className="shrink-0 bg-[#181A20] border border-[#2B3139] px-3 py-1.5 rounded-lg flex items-center gap-2 text-xs font-mono"
             >
               <span className="text-gray-400 font-semibold">{sec.symbol}</span>
-              <span className="text-[#EAECEF] font-bold">{sec.value.toFixed(1)}</span>
-              <span className={`text-[11px] font-bold ${sec.change >= 0 ? 'text-[#00C087]' : 'text-[#FF3B69]'}`}>
-                {sec.change >= 0 ? '+' : ''}{sec.changePercent.toFixed(2)}%
+              <span className="text-[#EAECEF] font-bold">{(sec.value ?? 0).toFixed(1)}</span>
+              <span className={`text-[11px] font-bold ${(sec.change ?? 0) >= 0 ? 'text-[#00C087]' : 'text-[#FF3B69]'}`}>
+                {(sec.change ?? 0) >= 0 ? '+' : ''}{(sec.changePercent ?? 0).toFixed(2)}%
               </span>
             </div>
           ))}
@@ -140,7 +140,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               </span>
               <span className={`text-xs font-mono font-bold flex items-center ${totalPnl >= 0 ? 'text-[#00C087]' : 'text-[#FF3B69]'}`}>
                 {totalPnl >= 0 ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
-                ₹{totalPnl.toLocaleString('en-IN', { maximumFractionDigits: 0 })} ({totalPnlPct.toFixed(2)}%)
+                ₹{totalPnl.toLocaleString('en-IN', { maximumFractionDigits: 0 })} ({(totalPnlPct ?? 0).toFixed(2)}%)
               </span>
             </div>
           </div>
@@ -226,15 +226,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <div className="grid grid-cols-4 gap-2 my-2.5 p-2.5 bg-[#1E2329] rounded-lg border border-[#2B3139] text-center font-mono text-[11px]">
                   <div>
                     <span className="text-gray-500 block text-[9px] uppercase">Entry Zone</span>
-                    <span className="text-[#EAECEF] font-bold">₹{sig.entryRange[0].toFixed(0)}</span>
+                    <span className="text-[#EAECEF] font-bold">₹{(sig.entryRange?.[0] ?? 0).toFixed(0)}</span>
                   </div>
                   <div>
                     <span className="text-gray-500 block text-[9px] uppercase">Stop Loss</span>
-                    <span className="text-[#FF3B69] font-bold">₹{sig.stopLoss.toFixed(0)}</span>
+                    <span className="text-[#FF3B69] font-bold">₹{(sig.stopLoss ?? 0).toFixed(0)}</span>
                   </div>
                   <div>
                     <span className="text-gray-500 block text-[9px] uppercase">Target 1</span>
-                    <span className="text-[#00C087] font-bold">₹{sig.target1.toFixed(0)}</span>
+                    <span className="text-[#00C087] font-bold">₹{(sig.target1 ?? 0).toFixed(0)}</span>
                   </div>
                   <div>
                     <span className="text-gray-500 block text-[9px] uppercase">R:R Ratio</span>
@@ -348,18 +348,18 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
                 <div className="flex items-baseline justify-between mt-2 font-mono">
                   <span className="text-sm font-bold text-[#EAECEF]">
-                    ₹{st.price.toFixed(2)}
+                    ₹{(st.price ?? 0).toFixed(2)}
                   </span>
                   <span className={`text-xs font-bold ${isPos ? 'text-[#00C087]' : 'text-[#FF3B69]'}`}>
-                    {isPos ? '+' : ''}{st.changePercent.toFixed(2)}%
+                    {isPos ? '+' : ''}{(st.changePercent ?? 0).toFixed(2)}%
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between text-[10px] text-gray-500 font-mono mt-2 pt-2 border-t border-[#2B3139]">
-                  <span>Deliv: <strong className="text-gray-300">{st.deliveryPercent}%</strong></span>
-                  <span>RSI: <strong className="text-gray-300">{st.technicals.rsi.toFixed(0)}</strong></span>
-                  <span className={st.technicals.trendDirection === 'Bullish' ? 'text-[#00C087]' : st.technicals.trendDirection === 'Bearish' ? 'text-[#FF3B69]' : 'text-gray-400'}>
-                    {st.technicals.trendDirection}
+                  <span>Deliv: <strong className="text-gray-300">{st.deliveryPercent ?? 45}%</strong></span>
+                  <span>RSI: <strong className="text-gray-300">{(st.technicals?.rsi ?? 50).toFixed(0)}</strong></span>
+                  <span className={st.technicals?.trendDirection === 'Bullish' ? 'text-[#00C087]' : st.technicals?.trendDirection === 'Bearish' ? 'text-[#FF3B69]' : 'text-gray-400'}>
+                    {st.technicals?.trendDirection || 'Neutral'}
                   </span>
                 </div>
               </div>

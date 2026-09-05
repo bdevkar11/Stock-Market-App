@@ -53,7 +53,7 @@ export const PortfolioView: React.FC<PortfolioViewProps> = ({
               </span>
               <span className={`text-xs font-mono font-bold flex items-center ${totalPnl >= 0 ? 'text-[#00C087]' : 'text-[#FF3B69]'}`}>
                 {totalPnl >= 0 ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
-                ₹{totalPnl.toLocaleString('en-IN', { maximumFractionDigits: 0 })} ({totalPnlPct.toFixed(2)}%)
+                ₹{totalPnl.toLocaleString('en-IN', { maximumFractionDigits: 0 })} ({(totalPnlPct ?? 0).toFixed(2)}%)
               </span>
             </div>
           </div>
@@ -177,14 +177,14 @@ export const PortfolioView: React.FC<PortfolioViewProps> = ({
                           </span>
                         </td>
                         <td className="py-2.5 px-2 text-gray-200 font-bold">{h.quantity}</td>
-                        <td className="py-2.5 px-2 text-gray-300">₹{h.avgBuyPrice.toFixed(2)}</td>
-                        <td className="py-2.5 px-2 text-[#EAECEF] font-bold">₹{h.currentPrice.toFixed(2)}</td>
-                        <td className="py-2.5 px-2 text-gray-300">₹{h.currentValue.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</td>
+                        <td className="py-2.5 px-2 text-gray-300">₹{(h.avgBuyPrice ?? 0).toFixed(2)}</td>
+                        <td className="py-2.5 px-2 text-[#EAECEF] font-bold">₹{(h.currentPrice ?? 0).toFixed(2)}</td>
+                        <td className="py-2.5 px-2 text-gray-300">₹{(h.currentValue ?? 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</td>
                         <td className={`py-2.5 px-2 font-black ${isProfit ? 'text-[#00C087]' : 'text-[#FF3B69]'}`}>
-                          {isProfit ? '+' : ''}₹{h.pnl.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                          {isProfit ? '+' : ''}₹{(h.pnl ?? 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                         </td>
                         <td className={`py-2.5 px-2 font-bold ${isProfit ? 'text-[#00C087]' : 'text-[#FF3B69]'}`}>
-                          {isProfit ? '+' : ''}{h.pnlPercent.toFixed(2)}%
+                          {isProfit ? '+' : ''}{(h.pnlPercent ?? 0).toFixed(2)}%
                         </td>
                         <td className="py-2.5 px-3 text-right">
                           <button
@@ -237,7 +237,7 @@ export const PortfolioView: React.FC<PortfolioViewProps> = ({
                       </td>
                       <td className="py-2.5 px-2 text-gray-400">{o.product}</td>
                       <td className="py-2.5 px-2 font-bold text-gray-200">{o.quantity}</td>
-                      <td className="py-2.5 px-2 font-mono text-gray-200">₹{o.price.toFixed(2)}</td>
+                      <td className="py-2.5 px-2 font-mono text-gray-200">₹{(o.price ?? 0).toFixed(2)}</td>
                       <td className="py-2.5 px-3 text-right">
                         <span className="px-2 py-0.5 rounded bg-[#00C087]/15 text-[#00C087] border border-[#00C087]/30 text-[10px] font-bold">
                           {o.status}
