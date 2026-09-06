@@ -1,5 +1,6 @@
 import { MarketIndex, StockQuote, Candle, TechnicalIndicators } from '../src/types';
 import { INITIAL_INDICES, INITIAL_STOCKS, generateCandles } from '../src/data/mockMarketData';
+import { NSE_STOCK_DEFINITIONS } from '../src/data/allStocksData';
 
 interface CachedData {
   indices: MarketIndex[];
@@ -9,7 +10,7 @@ interface CachedData {
 }
 
 let cache: CachedData | null = null;
-const CACHE_TTL_MS = 8000; // 8 seconds cache to avoid rate limits
+const CACHE_TTL_MS = 10000; // 10 seconds cache to avoid rate limits & keep app ultra-lightweight
 
 // Symbol definitions for Indian Market
 export const YAHOO_INDEX_MAP: Record<string, { yahooSymbol: string; name: string; category: 'broad' | 'sector' }> = {
@@ -20,20 +21,23 @@ export const YAHOO_INDEX_MAP: Record<string, { yahooSymbol: string; name: string
   'NIFTY AUTO': { yahooSymbol: '^CNXAUTO', name: 'NIFTY AUTO', category: 'sector' },
 };
 
-export const YAHOO_STOCK_MAP: Record<string, { yahooSymbol: string; name: string; sector: string; lotSize: number }> = {
-  'RELIANCE': { yahooSymbol: 'RELIANCE.NS', name: 'Reliance Industries Ltd.', sector: 'Energy & Petrochemicals', lotSize: 250 },
-  'HDFCBANK': { yahooSymbol: 'HDFCBANK.NS', name: 'HDFC Bank Ltd.', sector: 'Banking & Financials', lotSize: 550 },
-  'TCS': { yahooSymbol: 'TCS.NS', name: 'Tata Consultancy Services', sector: 'Information Technology', lotSize: 175 },
-  'INFY': { yahooSymbol: 'INFY.NS', name: 'Infosys Ltd.', sector: 'Information Technology', lotSize: 400 },
-  'ICICIBANK': { yahooSymbol: 'ICICIBANK.NS', name: 'ICICI Bank Ltd.', sector: 'Banking & Financials', lotSize: 700 },
-  'SBIN': { yahooSymbol: 'SBIN.NS', name: 'State Bank of India', sector: 'Public Sector Banking', lotSize: 750 },
-  'BHARTIARTL': { yahooSymbol: 'BHARTIARTL.NS', name: 'Bharti Airtel Ltd.', sector: 'Telecommunications', lotSize: 475 },
-  'ITC': { yahooSymbol: 'ITC.NS', name: 'ITC Ltd.', sector: 'FMCG & Cigarettes', lotSize: 1600 },
-  'LT': { yahooSymbol: 'LT.NS', name: 'Larsen & Toubro Ltd.', sector: 'Infrastructure & Capital Goods', lotSize: 150 },
-  'KOTAKBANK': { yahooSymbol: 'KOTAKBANK.NS', name: 'Kotak Mahindra Bank', sector: 'Banking & Financials', lotSize: 400 },
-  'AXISBANK': { yahooSymbol: 'AXISBANK.NS', name: 'Axis Bank Ltd.', sector: 'Banking & Financials', lotSize: 625 },
-  'BAJFINANCE': { yahooSymbol: 'BAJFINANCE.NS', name: 'Bajaj Finance Ltd.', sector: 'NBFC & Financials', lotSize: 125 },
-};
+// Populate YAHOO_STOCK_MAP for all 54+ NSE stocks
+export const YAHOO_STOCK_MAP: Record<string, { yahooSymbol: string; name: string; sector: string; lotSize: number }> = {};
+NSE_STOCK_DEFINITIONS.forEach(def => {
+  YAHOO_STOCK_MAP[def.symbol] = {
+    yahooSymbol: `${def.symbol}.NS`,
+    name: def.name,
+    sector: def.sector,
+    lotSize: def.lotSize
+  };
+});
+
+// Priority list of heavily traded stocks to refresh in batch feed (keeps wait times < 600ms)
+const BATCH_PRIORITY_SYMBOLS = [
+  'RELIANCE', 'HDFCBANK', 'TCS', 'INFY', 'ICICIBANK', 'SBIN', 'BHARTIARTL',
+  'ITC', 'LT', 'KOTAKBANK', 'AXISBANK', 'BAJFINANCE', 'TATAMOTORS', 'MARUTI',
+  'SUNPHARMA', 'TITAN', 'ZOMATO', 'HAL'
+];
 
 export function isIndianMarketOpen(): boolean {
   try {
@@ -215,68 +219,12 @@ export async function fetchLiveIndianMarketData() {
     }
   });
 
-  // 2. Fetch Stocks concurrently
-  const stockEntries = Object.entries(YAHOO_STOCK_MAP);
-  const stockPromises = stockEntries.map(async ([symbolKey, info]) => {
-    try {
-      const result = await fetchYahooChart(info.yahooSymbol, '1d', '15m');
-      const meta = result?.meta;
-      const price = +(meta?.regularMarketPrice ?? 0).toFixed(2);
-      const prevClose = +(meta?.previousClose ?? (meta?.chartPreviousClose ?? price)).toFixed(2);
-      const change = +(price - prevClose).toFixed(2);
-      const changePercent = prevClose ? +((change / prevClose) * 100).toFixed(2) : 0;
-      const high = +(meta?.regularMarketDayHigh ?? (price * 1.008)).toFixed(2);
-      const low = +(meta?.regularMarketDayLow ?? (price * 0.992)).toFixed(2);
-      const open = +(meta?.regularMarketOpen ?? prevClose).toFixed(2);
-      const volume = meta?.regularMarketVolume || 2500000;
+  // 2. Fetch Priority Stocks concurrently with timeout protection
+  const priorityStockEntries = Object.entries(YAHOO_STOCK_MAP)
+    .filter(([symbol]) => BATCH_PRIORITY_SYMBOLS.includes(symbol));
 
-      let candles = parseCandles(result);
-      if (candles.length === 0) {
-        candles = generateCandles(price, 30, 0.006);
-      }
-
-      const technicals = computeTechnicals(price, high, low, prevClose, candles);
-      const isBullish = change >= 0;
-
-      const stockItem: StockQuote = {
-        symbol: symbolKey,
-        name: info.name,
-        exchange: 'NSE',
-        sector: info.sector,
-        price,
-        change,
-        changePercent,
-        open,
-        high,
-        low,
-        prevClose,
-        volume,
-        deliveryPercent: technicals.deliveryPercent,
-        week52High: +(meta?.fiftyTwoWeekHigh ?? price * 1.15).toFixed(2),
-        week52Low: +(meta?.fiftyTwoWeekLow ?? price * 0.85).toFixed(2),
-        pe: +(22 + (price % 15)).toFixed(1),
-        marketCapCr: +(price * info.lotSize * 850).toFixed(0) as unknown as number,
-        isFnO: true,
-        lotSize: info.lotSize,
-        technicals,
-        timeframeTrend: {
-          '1m': isBullish ? 'Bullish' : 'Neutral',
-          '5m': isBullish ? 'Bullish' : 'Neutral',
-          '15m': isBullish ? 'Bullish' : 'Bearish',
-          '30m': isBullish ? 'Bullish' : 'Bearish',
-          '1h': isBullish ? 'Bullish' : 'Bearish',
-          '1d': isBullish ? 'Bullish' : 'Neutral',
-          '1w': 'Bullish'
-        },
-        history: candles
-      };
-
-      return stockItem;
-    } catch (err) {
-      // Fallback to initial mock item
-      const fallback = INITIAL_STOCKS.find(stk => stk.symbol === symbolKey);
-      return fallback || null;
-    }
+  const stockPromises = priorityStockEntries.map(async ([symbolKey, info]) => {
+    return fetchLiveStockQuote(symbolKey, info);
   });
 
   const [indexResults, stockResults] = await Promise.all([
@@ -284,19 +232,24 @@ export async function fetchLiveIndianMarketData() {
     Promise.all(stockPromises)
   ]);
 
-  const indices = indexResults.filter((i): i is MarketIndex => i !== null);
-  const stocks = stockResults.filter((s): s is StockQuote => s !== null);
+  const liveIndices = indexResults.filter((i): i is MarketIndex => i !== null);
+  const liveStocks = stockResults.filter((s): s is StockQuote => s !== null);
 
   // Merge live indices with INITIAL_INDICES so all sector and broad indices are always present
   const finalIndices = INITIAL_INDICES.map(initIdx => {
-    const live = indices.find(i => i.symbol === initIdx.symbol);
+    const live = liveIndices.find(i => i.symbol === initIdx.symbol);
     return live || initIdx;
   });
 
-  // Merge live stocks with INITIAL_STOCKS so all stock symbols (including TATAMOTORS, MARUTI) are always present
+  // Keep existing cached stocks if available, overlay live fetched, fallback to INITIAL_STOCKS
+  const existingStocksMap = new Map<string, StockQuote>();
+  if (cache?.stocks) {
+    cache.stocks.forEach(s => existingStocksMap.set(s.symbol, s));
+  }
+  liveStocks.forEach(s => existingStocksMap.set(s.symbol, s));
+
   const finalStocks = INITIAL_STOCKS.map(initStk => {
-    const live = stocks.find(s => s.symbol === initStk.symbol);
-    return live || initStk;
+    return existingStocksMap.get(initStk.symbol) || initStk;
   });
 
   cache = {
@@ -311,6 +264,91 @@ export async function fetchLiveIndianMarketData() {
     cached: false,
     cacheAgeMs: 0
   };
+}
+
+export async function fetchLiveStockQuote(
+  symbolKey: string, 
+  stockInfo?: { yahooSymbol: string; name: string; sector: string; lotSize: number }
+): Promise<StockQuote | null> {
+  const info = stockInfo || YAHOO_STOCK_MAP[symbolKey] || {
+    yahooSymbol: `${symbolKey}.NS`,
+    name: symbolKey,
+    sector: 'Equity',
+    lotSize: 100
+  };
+
+  try {
+    const result = await fetchYahooChart(info.yahooSymbol, '1d', '15m');
+    const meta = result?.meta;
+    const price = +(meta?.regularMarketPrice ?? 0).toFixed(2);
+    if (!price || price <= 0) {
+      return INITIAL_STOCKS.find(s => s.symbol === symbolKey) || null;
+    }
+
+    const prevClose = +(meta?.previousClose ?? (meta?.chartPreviousClose ?? price)).toFixed(2);
+    const change = +(price - prevClose).toFixed(2);
+    const changePercent = prevClose ? +((change / prevClose) * 100).toFixed(2) : 0;
+    const high = +(meta?.regularMarketDayHigh ?? (price * 1.008)).toFixed(2);
+    const low = +(meta?.regularMarketDayLow ?? (price * 0.992)).toFixed(2);
+    const open = +(meta?.regularMarketOpen ?? prevClose).toFixed(2);
+    const volume = meta?.regularMarketVolume || 2500000;
+
+    let candles = parseCandles(result);
+    if (candles.length === 0) {
+      candles = generateCandles(price, 30, 0.006);
+    }
+
+    const technicals = computeTechnicals(price, high, low, prevClose, candles);
+    const isBullish = change >= 0;
+
+    const stockItem: StockQuote = {
+      symbol: symbolKey,
+      name: info.name,
+      exchange: 'NSE',
+      sector: info.sector,
+      price,
+      change,
+      changePercent,
+      open,
+      high,
+      low,
+      prevClose,
+      volume,
+      deliveryPercent: technicals.deliveryPercent,
+      week52High: +(meta?.fiftyTwoWeekHigh ?? price * 1.15).toFixed(2),
+      week52Low: +(meta?.fiftyTwoWeekLow ?? price * 0.85).toFixed(2),
+      pe: +(22 + (price % 15)).toFixed(1),
+      marketCapCr: +(price * info.lotSize * 850).toFixed(0) as unknown as number,
+      isFnO: true,
+      lotSize: info.lotSize,
+      technicals,
+      timeframeTrend: {
+        '1m': isBullish ? 'Bullish' : 'Neutral',
+        '5m': isBullish ? 'Bullish' : 'Neutral',
+        '15m': isBullish ? 'Bullish' : 'Bearish',
+        '30m': isBullish ? 'Bullish' : 'Bearish',
+        '1h': isBullish ? 'Bullish' : 'Bearish',
+        '1d': isBullish ? 'Bullish' : 'Neutral',
+        '1w': 'Bullish'
+      },
+      history: candles
+    };
+
+    // Update in-memory cache if initialized
+    if (cache?.stocks) {
+      const idx = cache.stocks.findIndex(s => s.symbol === symbolKey);
+      if (idx >= 0) {
+        cache.stocks[idx] = stockItem;
+      } else {
+        cache.stocks.push(stockItem);
+      }
+    }
+
+    return stockItem;
+  } catch (err) {
+    const fallback = INITIAL_STOCKS.find(stk => stk.symbol === symbolKey);
+    return fallback || null;
+  }
 }
 
 export async function fetchSingleSymbolLiveChart(symbol: string, range = '1d', interval = '5m') {

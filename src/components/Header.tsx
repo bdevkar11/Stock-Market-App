@@ -16,7 +16,8 @@ import {
   Zap,
   Download,
   CheckCircle2,
-  X
+  X,
+  Search
 } from 'lucide-react';
 import { DataFreshness, MarketIndex } from '../types';
 
@@ -29,6 +30,7 @@ interface HeaderProps {
   setDataFreshness: (val: DataFreshness) => void;
   virtualBalance: number;
   onOpenOrderModal: () => void;
+  onOpenSearchModal: () => void;
   isLiveFeedActive: boolean;
   setIsLiveFeedActive: (val: boolean) => void;
   isLiveLoading: boolean;
@@ -47,6 +49,7 @@ export const Header: React.FC<HeaderProps> = ({
   setDataFreshness,
   virtualBalance,
   onOpenOrderModal,
+  onOpenSearchModal,
   isLiveFeedActive,
   setIsLiveFeedActive,
   isLiveLoading,
@@ -205,6 +208,20 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Action Controls */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Quick Search 54+ Live Stocks */}
+          <button
+            onClick={onOpenSearchModal}
+            title="Search all 54+ live stocks by symbol, name, or sector (Ctrl+K or /)"
+            className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg bg-[#1E2329] hover:bg-[#2B3139] border border-[#2B3139] hover:border-[#F0B90B]/50 text-xs text-gray-300 hover:text-[#EAECEF] transition-all cursor-pointer group shadow-sm"
+          >
+            <Search className="w-3.5 h-3.5 text-[#F0B90B] group-hover:scale-110 transition-transform" />
+            <span className="hidden sm:inline font-medium text-xs">Search Stocks</span>
+            <span className="sm:hidden font-mono text-[11px]">Search</span>
+            <kbd className="hidden md:inline-block px-1.5 py-0.2 text-[9px] font-mono bg-[#14151A] text-gray-400 rounded border border-[#2B3139]">
+              /
+            </kbd>
+          </button>
+
           {/* Live NSE Proxy Feed Toggle & Manual Sync */}
           <div className="flex items-center bg-[#1E2329] border border-[#2B3139] rounded-lg p-0.5">
             <button

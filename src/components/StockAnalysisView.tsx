@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -13,10 +13,14 @@ import {
   Calendar,
   Zap,
   Info,
-  ChevronRight
+  ChevronRight,
+  X,
+  Filter,
+  Check
 } from 'lucide-react';
 import { StockQuote, Timeframe } from '../types';
 import { CandlestickChart } from './CandlestickChart';
+import { ALL_SECTORS } from '../data/allStocksData';
 
 interface StockAnalysisViewProps {
   stocks: StockQuote[];
@@ -34,47 +38,163 @@ export const StockAnalysisView: React.FC<StockAnalysisViewProps> = ({
   onNavigateTab
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [selectedSector, setSelectedSector] = useState<string>('All Sectors');
   const [activeSubTab, setActiveSubTab] = useState<'TECHNICALS' | 'PIVOTS' | 'TIMEFRAMES' | 'DELIVERY'>('TECHNICALS');
+  const searchContainerRef = useRef<HTMLDivElement>(null);
 
-  const filteredStocks = stocks.filter(s => 
-    s.symbol.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    s.sector.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Close search dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+        setIsSearchFocused(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
-  const isPos = selectedStock.change >= 0;
+  // Filter stocks by query and sector
+  const filteredStocks = useMemo(() => {
+    let list = stocks;
+    if (selectedSector !== 'All Sectors') {
+      list = list.filter(s => s.sector.toLowerCase().includes(selectedSector.toLowerCase()));
+    }
+    const q = searchQuery.trim().toLowerCase();
+    if (q) {
+      list = list.filter(s => 
+        s.symbol.toLowerCase().includes(q) || 
+        s.name.toLowerCase().includes(q) ||
+        s.sector.toLowerCase().includes(q)
+      );
+    }
+    return list;
+  }, [stocks, searchQuery, selectedSector]);
+
+  // Dropdown suggestions (limited to 8 for lightweight DOM rendering)
+  const dropdownSuggestions = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return [];
+    return stocks.filter(s =>
+      s.symbol.toLowerCase().includes(q) ||
+      s.name.toLowerCase().includes(q) ||
+      s.sector.toLowerCase().includes(q)
+    ).slice(0, 8);
+  }, [stocks, searchQuery]);
+
+  const isPos = (selectedStock.change ?? 0) >= 0;
   const tech = selectedStock.technicals;
 
   return (
     <div className="space-y-4">
       {/* Top Search & Stock Selector Strip */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-[#181A20] p-3 rounded-xl border border-[#2B3139] shadow-sm">
-        <div className="relative flex-1 min-w-[200px] max-w-md">
-          <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
-          <input
-            type="text"
-            placeholder="Search stock by symbol, name, or sector..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#1E2329] border border-[#2B3139] rounded-lg pl-9 pr-3 py-1.5 text-xs text-[#EAECEF] placeholder-gray-500 focus:border-[#F0B90B] outline-none font-mono"
-          />
+      <div className="bg-[#181A20] p-3 rounded-xl border border-[#2B3139] shadow-sm space-y-2.5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          {/* Live Search Input with Dropdown */}
+          <div ref={searchContainerRef} className="relative flex-1 min-w-[240px] max-w-lg">
+            <Search className="w-4 h-4 text-[#F0B90B] absolute left-3 top-2.5" />
+            <input
+              type="text"
+              placeholder="Search all 54+ live stocks (e.g. RELIANCE, ZOMATO, Banking)..."
+              value={searchQuery}
+              onFocus={() => setIsSearchFocused(true)}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-[#1E2329] border border-[#2B3139] rounded-lg pl-9 pr-8 py-1.5 text-xs text-[#EAECEF] placeholder-gray-500 focus:border-[#F0B90B] outline-none font-mono"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setIsSearchFocused(false);
+                }}
+                className="absolute right-2.5 top-2 text-gray-400 hover:text-[#EAECEF]"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+
+            {/* Instant Floating Search Suggestions Dropdown */}
+            {isSearchFocused && dropdownSuggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-1.5 bg-[#181A20] border border-[#2B3139] rounded-xl shadow-2xl z-30 overflow-hidden divide-y divide-[#2B3139]/60 max-h-72 overflow-y-auto">
+                <div className="px-3 py-1.5 bg-[#14151A] text-[10px] font-mono text-gray-500 flex justify-between">
+                  <span>Matching Stocks ({dropdownSuggestions.length})</span>
+                  <span>Click to select</span>
+                </div>
+                {dropdownSuggestions.map(stk => {
+                  const isBull = (stk.change ?? 0) >= 0;
+                  return (
+                    <div
+                      key={stk.symbol}
+                      onClick={() => {
+                        onSelectStock(stk);
+                        setSearchQuery('');
+                        setIsSearchFocused(false);
+                      }}
+                      className="px-3 py-2 flex items-center justify-between hover:bg-[#1E2329] cursor-pointer transition-colors"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="font-extrabold text-xs text-[#EAECEF] font-mono">{stk.symbol}</span>
+                        <span className="text-[10px] text-gray-400 truncate max-w-[150px]">{stk.name}</span>
+                        <span className="text-[9px] px-1 py-0.2 rounded bg-[#2B3139] text-gray-400">{stk.sector}</span>
+                      </div>
+                      <div className="text-right font-mono text-xs">
+                        <span className="text-[#EAECEF] font-bold">₹{(stk.price ?? 0).toFixed(2)}</span>
+                        <span className={`ml-2 text-[11px] font-bold ${isBull ? 'text-[#00C087]' : 'text-[#FF3B69]'}`}>
+                          {isBull ? '+' : ''}{(stk.changePercent ?? 0).toFixed(2)}%
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Sector Selector Filter */}
+          <div className="flex items-center gap-2">
+            <Filter className="w-3.5 h-3.5 text-gray-400 hidden sm:inline" />
+            <select
+              value={selectedSector}
+              onChange={(e) => setSelectedSector(e.target.value)}
+              className="bg-[#1E2329] text-xs text-gray-300 font-mono px-2.5 py-1.5 rounded-lg border border-[#2B3139] hover:border-[#F0B90B]/50 outline-none cursor-pointer"
+            >
+              {ALL_SECTORS.map(sec => (
+                <option key={sec} value={sec} className="bg-[#181A20] text-[#EAECEF]">{sec}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        {/* Quick Stock Badges */}
+        {/* Quick Stock Badges Bar (Scrollable, filtered by sector/search, max 16 for ultra-lightweight DOM) */}
         <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none py-1">
-          {stocks.slice(0, 6).map(s => (
-            <button
-              key={s.symbol}
-              onClick={() => onSelectStock(s)}
-              className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all shrink-0 cursor-pointer ${
-                selectedStock.symbol === s.symbol
-                  ? 'bg-[#F0B90B] text-[#0B0E11] font-bold shadow-sm'
-                  : 'bg-[#1E2329] text-gray-400 hover:text-[#EAECEF] border border-[#2B3139]'
-              }`}
-            >
-              {s.symbol}
-            </button>
-          ))}
+          <span className="text-[10px] font-mono text-gray-500 shrink-0 uppercase tracking-wider pr-1">
+            {filteredStocks.length} Stocks:
+          </span>
+          {filteredStocks.slice(0, 18).map(s => {
+            const isBull = (s.change ?? 0) >= 0;
+            const isSelected = selectedStock.symbol === s.symbol;
+
+            return (
+              <button
+                key={s.symbol}
+                onClick={() => onSelectStock(s)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-all shrink-0 cursor-pointer flex items-center gap-1.5 ${
+                  isSelected
+                    ? 'bg-[#F0B90B] text-[#0B0E11] font-bold shadow-sm'
+                    : 'bg-[#1E2329] text-gray-300 hover:text-[#EAECEF] border border-[#2B3139]'
+                }`}
+              >
+                <span>{s.symbol}</span>
+                <span className={`text-[10px] ${
+                  isSelected 
+                    ? 'text-black font-extrabold' 
+                    : isBull ? 'text-[#00C087]' : 'text-[#FF3B69]'
+                }`}>
+                  {isBull ? '+' : ''}{(s.changePercent ?? 0).toFixed(1)}%
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 

@@ -49,12 +49,14 @@ import { AlertsView } from './components/AlertsView';
 import { BrokerIntegrationView } from './components/BrokerIntegrationView';
 import { AdminDashboardView } from './components/AdminDashboardView';
 import { OrderModal } from './components/OrderModal';
+import { StockSearchModal } from './components/StockSearchModal';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [isAndroidFrame, setIsAndroidFrame] = useState<boolean>(false);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
   const [dataFreshness, setDataFreshness] = useState<DataFreshness>('Real-time');
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState<boolean>(false);
 
   // Market & Trading State
   const [indices, setIndices] = useState<MarketIndex[]>(INITIAL_INDICES);
@@ -177,6 +179,22 @@ export default function App() {
       return () => clearInterval(interval);
     }
   }, [isLiveFeedActive]);
+
+  // Global keyboard shortcut to open stock search ('/' or 'Ctrl+K' / 'Cmd+K')
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      const targetTag = (e.target as HTMLElement)?.tagName?.toUpperCase();
+      if (targetTag === 'INPUT' || targetTag === 'TEXTAREA' || targetTag === 'SELECT') {
+        return;
+      }
+      if (e.key === '/' || ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k')) {
+        e.preventDefault();
+        setIsSearchModalOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, []);
 
   const handleToggleWatchlist = (symbol: string) => {
     setWatchlist(prev => 
@@ -369,6 +387,7 @@ export default function App() {
         setDataFreshness={setDataFreshness}
         virtualBalance={virtualBalance}
         onOpenOrderModal={() => setIsOrderModalOpen(true)}
+        onOpenSearchModal={() => setIsSearchModalOpen(true)}
         isLiveFeedActive={isLiveFeedActive}
         setIsLiveFeedActive={setIsLiveFeedActive}
         isLiveLoading={isLiveLoading}
@@ -475,6 +494,16 @@ export default function App() {
         initialTarget={orderModalTarget}
         onExecuteOrder={handleExecuteOrder}
         virtualBalance={virtualBalance}
+      />
+
+      {/* Global Quick Search Modal for all 54+ Live Stocks */}
+      <StockSearchModal
+        isOpen={isSearchModalOpen}
+        onClose={() => setIsSearchModalOpen(false)}
+        stocks={stocks}
+        selectedSymbol={selectedStock.symbol}
+        onSelectStock={handleSelectStock}
+        onTradeStock={handleTradeStock}
       />
     </div>
   );

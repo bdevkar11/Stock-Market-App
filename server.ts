@@ -16,6 +16,7 @@ import {
 import { 
   fetchLiveIndianMarketData, 
   fetchSingleSymbolLiveChart, 
+  fetchLiveStockQuote,
   isIndianMarketOpen 
 } from './server/marketProxy.ts';
 
@@ -92,6 +93,16 @@ async function startServer() {
       res.json(data.stocks);
     } catch (err) {
       res.json(INITIAL_STOCKS);
+    }
+  });
+
+  app.get('/api/market/quote', async (req, res) => {
+    try {
+      const symbol = ((req.query.symbol as string) || 'RELIANCE').trim().toUpperCase();
+      const quote = await fetchLiveStockQuote(symbol);
+      res.json({ success: true, quote });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
     }
   });
 

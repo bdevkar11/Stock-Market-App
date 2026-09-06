@@ -43,10 +43,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const broadIndices = indices.filter(i => i.category === 'broad');
   const sectorIndices = indices.filter(i => i.category === 'sector');
 
-  // Sorted stocks
-  const topGainers = [...stocks].sort((a, b) => b.changePercent - a.changePercent).slice(0, 4);
-  const topLosers = [...stocks].sort((a, b) => a.changePercent - b.changePercent).slice(0, 4);
-  const topVolume = [...stocks].sort((a, b) => b.volume - a.volume).slice(0, 4);
+  // Sorted stocks across all live symbols
+  const topGainers = [...stocks].sort((a, b) => b.changePercent - a.changePercent).slice(0, 8);
+  const topLosers = [...stocks].sort((a, b) => a.changePercent - b.changePercent).slice(0, 8);
+  const topVolume = [...stocks].sort((a, b) => b.volume - a.volume).slice(0, 8);
 
   // Portfolio aggregates
   const totalInvested = portfolio.reduce((acc, h) => acc + h.investedAmount, 0);
@@ -277,10 +277,18 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* 4. Market Movers: Top Gainers, Losers, Top Volume */}
       <div className="bg-[#181A20] rounded-xl border border-[#2B3139] p-4 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-          <h2 className="text-xs uppercase tracking-wider font-bold text-[#EAECEF] flex items-center gap-1.5">
-            <Flame className="w-4 h-4 text-[#F0B90B]" />
-            Market Momentum &amp; Movers
-          </h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-xs uppercase tracking-wider font-bold text-[#EAECEF] flex items-center gap-1.5">
+              <Flame className="w-4 h-4 text-[#F0B90B]" />
+              Market Momentum &amp; Movers
+            </h2>
+            <button
+              onClick={() => onNavigateTab('stocks')}
+              className="text-[11px] font-mono text-[#F0B90B] hover:underline cursor-pointer flex items-center gap-0.5"
+            >
+              Browse all {stocks.length} live stocks <ChevronRight className="w-3 h-3" />
+            </button>
+          </div>
 
           <div className="flex items-center gap-1 bg-[#1E2329] p-1 rounded-lg border border-[#2B3139] text-xs">
             <button
